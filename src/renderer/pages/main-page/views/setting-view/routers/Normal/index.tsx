@@ -63,6 +63,7 @@ export default function Normal() {
                 options={[
                     "duration",
                     "platform",
+                    "quality",
                 ]}
                 renderItem={(item) => {
                     return t("media.media_" + item);

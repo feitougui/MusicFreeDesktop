@@ -5,7 +5,7 @@ interface _IAppConfig {
     "normal.checkUpdate": boolean;
     "normal.autoLoadMore": boolean;
     "normal.taskbarThumb": "window" | "artwork";
-    "normal.musicListColumnsShown": Array<"duration" | "platform">;
+    "normal.musicListColumnsShown": Array<"duration" | "platform" | "quality">;
     "normal.language": string;
 
     /** 歌单内搜索区分大小写 */

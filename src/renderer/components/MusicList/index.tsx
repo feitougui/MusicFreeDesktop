@@ -21,7 +21,15 @@ import { localPluginName, RequestStateCode } from "@/common/constant";
 import BottomLoadingState from "../BottomLoadingState";
 import { IContextMenuItem, showContextMenu } from "../ContextMenu";
 import { getInternalData, getMediaPrimaryKey, isSameMedia } from "@/common/media-util";
-import { CSSProperties, memo, useCallback, useEffect, useRef, useState } from "react";
+import {
+    CSSProperties,
+    memo,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import { showModal } from "../Modal";
 import useVirtualList from "@/hooks/useVirtualList";
 import hotkeys from "hotkeys-js";
@@ -35,6 +43,9 @@ import { i18n } from "@/shared/i18n/renderer";
 import isLocalMusic from "@/renderer/utils/is-local-music";
 import AppConfig from "@shared/app-config/renderer";
 import { shellUtil } from "@shared/utils/renderer";
+import MusicQualityInfo, {
+    getQualityInfoText,
+} from "@renderer/core/music-quality-info";
 
 interface IMusicListProps {
     /** 展示的播放列表 */
@@ -55,7 +66,14 @@ interface IMusicListProps {
     };
     containerStyle?: CSSProperties;
     hideRows?: Array<
-        "like" | "index" | "title" | "artist" | "album" | "duration" | "platform"
+        | "like"
+        | "index"
+        | "title"
+        | "artist"
+        | "album"
+        | "duration"
+        | "platform"
+        | "quality"
     >;
     /** 允许拖拽 */
     enableDrag?: boolean;
@@ -130,6 +148,19 @@ const columnDef: ColumnDef<IMusic.IMusicItem>[] = [
             info.getValue() ? secondsToDuration(info.getValue()) : "--:--",
         // @ts-ignore
         fr: 1,
+    }),
+    columnHelper.display({
+        id: "quality",
+        header: () => i18n.t("media.media_quality_info"),
+        size: 140,
+        minSize: 90,
+        maxSize: 240,
+        cell: (info) => {
+            const text = getQualityInfoText(info.row.original?.$qualityInfo);
+            return text ? <span title={text}>{text}</span> : null;
+        },
+        // @ts-ignore
+        fr: 1.4,
     }),
     columnHelper.accessor("platform", {
         header: () => i18n.t("media.media_platform"),
@@ -325,6 +356,28 @@ function _MusicList(props: IMusicListProps) {
 
     const [sorting, setSorting] = useState<SortingState>([]);
 
+    const qualityInfoMap = MusicQualityInfo.useQualityInfoMap();
+
+    const enrichedMusicList = useMemo(() => {
+        return musicList.map((item) => {
+            if (!item) {
+                return item;
+            }
+            const info = qualityInfoMap[getMediaPrimaryKey(item)];
+            if (item.$qualityInfo === info) {
+                return item;
+            }
+            return {
+                ...item,
+                $qualityInfo: info,
+            };
+        });
+    }, [musicList, qualityInfoMap]);
+
+    useEffect(() => {
+        MusicQualityInfo.requestQualityInfo(musicList);
+    }, [musicList]);
+
     const musicListRef = useRef(musicList);
     const columnShownRef = useRef(
         AppConfig.getConfig("normal.musicListColumnsShown").reduce(
@@ -338,7 +391,7 @@ function _MusicList(props: IMusicListProps) {
 
     const table = useReactTable({
         debugAll: false,
-        data: musicList,
+        data: enrichedMusicList,
         columns: columnDef,
         state: {
             sorting: sorting,

@@ -50,6 +50,7 @@
     "media_title": "Title",
     "media_platform": "Source",
     "media_duration": "Duration",
+    "media_quality_info": "Quality",
     "media_create_at": "Created At",
     "media_play_count": "Play Count",
     "media_music_count": "Song Count",

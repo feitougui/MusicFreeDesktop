@@ -1,0 +1,56 @@
+name: Build Windows (Custom)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Read version
+        shell: pwsh
+        run: |
+          $version = node -p "require('./package.json').version"
+          echo "VERSION=$version" >> $env:GITHUB_ENV
+
+      - name: Package app
+        run: npm run package
+
+      - name: Build installer (Inno Setup)
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+        with:
+          path: ./release/build-windows.iss
+          options: /DMyAppVersion=${{ env.VERSION }} /DMyAppId={9E0B0E8C-8E1B-4C0F-9E3D-7C6A1F2B4D55}
+
+      - name: Rename installer
+        shell: pwsh
+        run: |
+          Rename-Item -Path "./out/MusicFreeSetup.exe" -NewName "MusicFree-${{ env.VERSION }}-win32-x64-setup.exe"
+
+      - name: Archive portable
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "./out/MusicFree-win32-x64/*" -DestinationPath "./out/MusicFree-${{ env.VERSION }}-win32-x64-portable.zip"
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: MusicFree-${{ env.VERSION }}-win32-x64-setup
+          path: ./out/MusicFree-${{ env.VERSION }}-win32-x64-setup.exe
+          retention-days: 30
+
+      - name: Upload portable
+        uses: actions/upload-artifact@v4
+        with:
+          name: MusicFree-${{ env.VERSION }}-win32-x64-portable
+          path: ./out/MusicFree-${{ env.VERSION }}-win32-x64-portable.zip
+          retention-days: 30

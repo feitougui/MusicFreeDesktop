@@ -50,6 +50,7 @@
     "media_title": "標題",
     "media_platform": "來源",
     "media_duration": "時長",
+    "media_quality_info": "音質資訊",
     "media_create_at": "創建時間",
     "media_play_count": "播放次數",
     "media_music_count": "歌曲數量",

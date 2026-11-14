@@ -45,6 +45,7 @@
     "media_title": "标题",
     "media_platform": "来源",
     "media_duration": "时长",
+    "media_quality_info": "音质信息",
     "media_create_at": "创建时间",
     "media_play_count": "播放数",
     "media_music_count": "歌曲数",
