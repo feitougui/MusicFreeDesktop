@@ -33,7 +33,7 @@ jobs:
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
         with:
           path: ./release/build-windows.iss
-          options: /DMyAppVersion=${{ env.VERSION }} /DMyAppId={9E0B0E8C-8E1B-4C0F-9E3D-7C6A1F2B4D55}
+          options: /DMyAppVersion=${{ env.VERSION }} /DMyAppId=9E0B0E8C-8E1B-4C0F-9E3D-7C6A1F2B4D55
 
       - name: Rename installer
         shell: pwsh
